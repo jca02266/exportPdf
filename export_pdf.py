@@ -1,11 +1,17 @@
 import win32com.client as win32
 import os
-from typing import List
+from typing import List, Optional
+import pathlib
 
 
-def __make_pdf_path(path: str):
-    basename, _ = os.path.splitext(os.path.basename(path))
-    return basename + ".pdf"
+def make_pdf_path(path: str, basedir: Optional[str], outdir: str):
+    if basedir is None:
+        basedir = os.getcwd()
+
+    relative_path = pathlib.Path(path).relative_to(basedir)
+    pdf_path = pathlib.Path(outdir) / relative_path.parent / \
+        (relative_path.stem + ".pdf")
+    return str(pdf_path)
 
 
 class Excel:
@@ -37,9 +43,9 @@ class Word:
 
 
 def export_pdf_word(path: str, pdf_path: str = None, title: str = None,
-                    visible: bool = False):
+                    visible: bool = False, basedir: str = None, outdir="."):
     if pdf_path is None:
-        pdf_path = __make_pdf_path(path)
+        pdf_path = make_pdf_path(path, basedir, outdir)
 
     with Word(visible) as wd:
         wd.DisplayAlerts = False
@@ -70,9 +76,10 @@ def export_pdf_word(path: str, pdf_path: str = None, title: str = None,
 
 
 def export_pdf_excel(path: str, pdf_path: str = None, title: str = None,
-                     visible: bool = False, target_sheets: List[str] = []):
+                     visible: bool = False, basedir: str = None, outdir=".",
+                     target_sheets: List[str] = []):
     if pdf_path is None:
-        pdf_path = __make_pdf_path(path)
+        pdf_path = make_pdf_path(path, basedir, outdir)
 
     with Excel(visible) as xl:
         xl.DisplayAlerts = False
