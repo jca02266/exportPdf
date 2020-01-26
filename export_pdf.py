@@ -24,7 +24,7 @@ class Excel:
 
 class Word:
     def __init__(self, visible=False):
-        self.wd = win32.Dispatch("Word.Application")
+        self.wd = win32.gencache.EnsureDispatch("Word.Application")
         if visible:
             self.wd.Visible = visible
 
