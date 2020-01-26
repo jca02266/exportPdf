@@ -47,6 +47,8 @@ def export_pdf_word(wd, path: str, pdf_path: str = None, title: str = None,
     if pdf_path is None:
         pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
+    print(pdf_path)
+    os.makedirs(pathlib.Path(pdf_path).parent, exist_ok=True)
     wd.DisplayAlerts = False
 
     doc = wd.Documents.Open(path, ReadOnly=True)
@@ -80,6 +82,8 @@ def export_pdf_excel(xl, path: str, pdf_path: str = None, title: str = None,
     if pdf_path is None:
         pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
+    print(pdf_path)
+    os.makedirs(pathlib.Path(pdf_path).parent, exist_ok=True)
     xl.DisplayAlerts = False
 
     wb = xl.Workbooks.Open(path, ReadOnly=True)
@@ -117,12 +121,20 @@ def export_pdf(wd, xl, path: str, **opt):
 
 
 if __name__ == '__main__':
-    import sys
+    import argparse
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('files', metavar='PATH', type=str, nargs='+',
+                        help='paths of office document (xlsx or docx)')
+    parser.add_argument('--out', dest='outdir', action='store', default='out',
+                        help='out directory (default: out)')
+
+    args = parser.parse_args()
     visible = True
 
     with Word(visible) as wd:
         with Excel(visible) as xl:
 
-            for path in sys.argv[1:]:
-                export_pdf(wd, xl, os.path.abspath(path))
+            for path in args.files:
+                opt = {"outdir": args.outdir}
+                export_pdf(wd, xl, os.path.abspath(path), **opt)
