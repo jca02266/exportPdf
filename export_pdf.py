@@ -86,7 +86,7 @@ def export_pdf_excel(xl, path: str, pdf_path: str = None, title: str = None,
     os.makedirs(pathlib.Path(pdf_path).parent, exist_ok=True)
     xl.DisplayAlerts = False
 
-    wb = xl.Workbooks.Open(path, ReadOnly=True)
+    wb = xl.Workbooks.Open(path, ReadOnly=True, UpdateLinks=0)
 
     if title:
         # Not Bult*I*n , But Built*i*n
