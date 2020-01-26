@@ -42,85 +42,87 @@ class Word:
             self.wd.Quit()
 
 
-def export_pdf_word(path: str, pdf_path: str = None, title: str = None,
+def export_pdf_word(wd, path: str, pdf_path: str = None, title: str = None,
                     visible: bool = False, basedir: str = None, outdir="."):
     if pdf_path is None:
         pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
-    with Word(visible) as wd:
-        wd.DisplayAlerts = False
+    wd.DisplayAlerts = False
 
-        doc = wd.Documents.Open(path, ReadOnly=True)
+    doc = wd.Documents.Open(path, ReadOnly=True)
 
-        if title:
-            # Not Bult*i*n , But Built*I*n
-            doc.BuiltInDocumentProperties("Title").Value = title
+    if title:
+        # Not Bult*i*n , But Built*I*n
+        doc.BuiltInDocumentProperties("Title").Value = title
 
-        doc.ExportAsFixedFormat(
-            OutputFileName=os.path.join(doc.Path, pdf_path),
-            ExportFormat=win32.constants.wdExportFormatPDF,
-            OpenAfterExport=False,
-            OptimizeFor=win32.constants.wdExportOptimizeForPrint,
-            Range=win32.constants.wdExportAllDocument,
-            IncludeDocProps=False,
-            KeepIRM=False,
-            CreateBookmarks=win32.constants.wdExportCreateNoBookmarks,
-            DocStructureTags=False,
-            BitmapMissingFonts=True,
-            UseISO19005_1=False)
+    doc.ExportAsFixedFormat(
+        OutputFileName=os.path.join(doc.Path, pdf_path),
+        ExportFormat=win32.constants.wdExportFormatPDF,
+        OpenAfterExport=False,
+        OptimizeFor=win32.constants.wdExportOptimizeForPrint,
+        Range=win32.constants.wdExportAllDocument,
+        IncludeDocProps=False,
+        KeepIRM=False,
+        CreateBookmarks=win32.constants.wdExportCreateNoBookmarks,
+        DocStructureTags=False,
+        BitmapMissingFonts=True,
+        UseISO19005_1=False)
 
-        print("%d Pages" % doc.Content.Information(
-            win32.constants.wdNumberOfPagesInDocument))
-        doc.Saved = True
-        doc.Close()
+    print("%d Pages" % doc.Content.Information(
+        win32.constants.wdNumberOfPagesInDocument))
+    doc.Saved = True
+    doc.Close()
 
 
-def export_pdf_excel(path: str, pdf_path: str = None, title: str = None,
+def export_pdf_excel(xl, path: str, pdf_path: str = None, title: str = None,
                      visible: bool = False, basedir: str = None, outdir=".",
                      target_sheets: Collection[str] = ()):
     if pdf_path is None:
         pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
-    with Excel(visible) as xl:
-        xl.DisplayAlerts = False
+    xl.DisplayAlerts = False
 
-        wb = xl.Workbooks.Open(path, ReadOnly=True)
+    wb = xl.Workbooks.Open(path, ReadOnly=True)
 
-        if title:
-            # Not Bult*I*n , But Built*i*n
-            wb.BuiltinDocumentProperties("Title").Value = title
+    if title:
+        # Not Bult*I*n , But Built*i*n
+        wb.BuiltinDocumentProperties("Title").Value = title
 
-        if len(target_sheets) == 0:
-            target_sheets = list(target_sheets)
-            for ws in wb.Worksheets:
-                # Visible and Sheet tab color is not Black
-                if ws.Visible and ws.Tab.ColorIndex != 1:
-                    print(ws.Name, ws.Tab.ColorIndex)
-                    target_sheets.append(ws.Name)
+    if len(target_sheets) == 0:
+        target_sheets = list(target_sheets)
+        for ws in wb.Worksheets:
+            # Visible and Sheet tab color is not Black
+            if ws.Visible and ws.Tab.ColorIndex != 1:
+                print(ws.Name, ws.Tab.ColorIndex)
+                target_sheets.append(ws.Name)
 
-        wb.Worksheets(target_sheets).Select()
+    wb.Worksheets(target_sheets).Select()
 
-        wb.ActiveSheet.ExportAsFixedFormat(
-            Type=win32.constants.xlTypePDF,
-            Filename=os.path.join(wb.Path, pdf_path),
-            Quality=win32.constants.xlQualityStandard,
-            IncludeDocProperties=True,
-            IgnorePrintAreas=False,
-            OpenAfterPublish=False)
-        wb.Saved = True
-        wb.Close()
+    wb.ActiveSheet.ExportAsFixedFormat(
+        Type=win32.constants.xlTypePDF,
+        Filename=os.path.join(wb.Path, pdf_path),
+        Quality=win32.constants.xlQualityStandard,
+        IncludeDocProperties=True,
+        IgnorePrintAreas=False,
+        OpenAfterPublish=False)
+    wb.Saved = True
+    wb.Close()
 
 
-def export_pdf(path: str, **opt):
+def export_pdf(wd, xl, path: str, **opt):
     if path.endswith(".docx"):
-        export_pdf_word(path, **opt)
+        export_pdf_word(wd, path, **opt)
     elif path.endswith(".xlsx"):
-        export_pdf_excel(path, **opt)
+        export_pdf_excel(xl, path, **opt)
 
 
 if __name__ == '__main__':
     import sys
 
-    for path in sys.argv[1:]:
-        basename, _ = os.path.splitext(os.path.basename(path))
-        export_pdf(os.path.abspath(path))
+    visible = True
+
+    with Word(visible) as wd:
+        with Excel(visible) as xl:
+
+            for path in sys.argv[1:]:
+                export_pdf(wd, xl, os.path.abspath(path))
