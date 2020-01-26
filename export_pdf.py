@@ -45,7 +45,7 @@ class Word:
 def export_pdf_word(path: str, pdf_path: str = None, title: str = None,
                     visible: bool = False, basedir: str = None, outdir="."):
     if pdf_path is None:
-        pdf_path = make_pdf_path(path, basedir, outdir)
+        pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
     with Word(visible) as wd:
         wd.DisplayAlerts = False
@@ -79,7 +79,7 @@ def export_pdf_excel(path: str, pdf_path: str = None, title: str = None,
                      visible: bool = False, basedir: str = None, outdir=".",
                      target_sheets: Collection[str] = ()):
     if pdf_path is None:
-        pdf_path = make_pdf_path(path, basedir, outdir)
+        pdf_path = os.path.abspath(make_pdf_path(path, basedir, outdir))
 
     with Excel(visible) as xl:
         xl.DisplayAlerts = False
