@@ -1,6 +1,6 @@
 import win32com.client as win32
 import os
-from typing import List, Optional
+from typing import Optional, Collection
 import pathlib
 
 
@@ -77,7 +77,7 @@ def export_pdf_word(path: str, pdf_path: str = None, title: str = None,
 
 def export_pdf_excel(path: str, pdf_path: str = None, title: str = None,
                      visible: bool = False, basedir: str = None, outdir=".",
-                     target_sheets: List[str] = []):
+                     target_sheets: Collection[str] = ()):
     if pdf_path is None:
         pdf_path = make_pdf_path(path, basedir, outdir)
 
@@ -91,6 +91,7 @@ def export_pdf_excel(path: str, pdf_path: str = None, title: str = None,
             wb.BuiltinDocumentProperties("Title").Value = title
 
         if len(target_sheets) == 0:
+            target_sheets = list(target_sheets)
             for ws in wb.Worksheets:
                 # Visible and Sheet tab color is not Black
                 if ws.Visible and ws.Tab.ColorIndex != 1:
